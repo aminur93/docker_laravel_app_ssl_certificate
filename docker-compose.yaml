@@ -1,0 +1,40 @@
+version: '3.7'
+
+networks:
+  web-app-net:
+    name: my-web-app-net
+    driver: bridge
+
+volumes:
+  cert:
+  letsencrypt:
+
+
+services:
+  # wetelly-app service
+  laravel-app:
+      image: weetekhub/laravel-app:laravel-service-1.0.0
+      #image: wetelly:1.0
+      restart: unless-stopped
+      networks:
+        - web-app-net
+
+  proxy-app:
+      image: rsdnlesc/docker-term-letsencrypt
+      ports:
+        - 80:80
+        - 443:443
+      environment:
+       - SSL_DOMAIN=wetellybd.com
+       - SSL_FORWARD=http://laravel-app:80
+       - SSL_ADMIN_EMAIL=aminurrashid126@gmail.com
+      volumes:
+        - cert:/cert
+        - letsencrypt:/etc/letsencrypt
+      depends_on:
+        - laravel-app
+      links:
+        - laravel-app
+      networks:
+        - web-app-net
+###End Of File
